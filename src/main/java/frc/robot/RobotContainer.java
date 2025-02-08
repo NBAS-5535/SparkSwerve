@@ -148,6 +148,8 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.y().onTrue(new InstantCommand(() -> drive.stop()));
+
+    controller.povUp().whileTrue(DriveCommands.joystickDrive(drive, () -> 0.1, () -> 0., () -> 0.));
   }
 
   /**
