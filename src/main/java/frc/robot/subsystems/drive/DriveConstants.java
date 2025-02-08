@@ -56,8 +56,10 @@ public class DriveConstants {
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(2.);
-  public static final double driveMotorReduction =
-      (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
+  // from https://www.swervedrivespecialties.com/products/mk4-swerve-module : (50.0 / 14.0) * (17.0
+  // / 27.0) * (45.0 / 15.0)
+  public static final double driveMotorReduction = 6.75;
+  // (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
@@ -79,7 +81,9 @@ public class DriveConstants {
   // Turn motor configuration
   public static final boolean turnInverted = false;
   public static final int turnMotorCurrentLimit = 20;
-  public static final double turnMotorReduction = 9424.0 / 203.0;
+  // https://www.swervedrivespecialties.com/products/mk4-swerve-module : steering gear ratio of the
+  // MK4 is 12.8
+  public static final double turnMotorReduction = 12.8;
   public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
 
   // Turn encoder configuration
