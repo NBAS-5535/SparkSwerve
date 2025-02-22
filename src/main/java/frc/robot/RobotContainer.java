@@ -23,7 +23,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -47,6 +49,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  /* Limelight */
+  private final VisionSubsystem m_vision;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -87,6 +92,11 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    /* Limelight */
+    /* initial attempt */
+    // public final VisionSubsystem_Test limelight = new VisionSubsystem_Test();
+    m_vision = new VisionSubsystem();
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -150,6 +160,30 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> drive.stop()));
 
     controller.povUp().whileTrue(DriveCommands.joystickDrive(drive, () -> 0.1, () -> 0., () -> 0.));
+
+    /* Vision Subsystem */
+    boolean visionTest = false;
+    if (visionTest) {
+      // get vision-based distance
+      // joystick.x().onTrue(new InstantCommand(() -> limelight.getDistanceToTarget()));
+      /* onTrue: robot moves until the alignment is completed
+       *  whileTrue: must press the button until the alignment is completed
+       */
+      // joystick.x().onTrue(new AlignCommand(drivetrain, m_vision, VisionConstants.testTagId));
+      /* simulate a sequence:
+       * align with AprilTag
+       * Move forward by 2 meters
+       */
+      /* Testing Closest versus a specific AprilTag */
+      boolean closestTag = true;
+      // Default: a specific tag number
+      int testTagId = VisionConstants.testTagId;
+      if (closestTag) {
+        testTagId = 0;
+      }
+
+      // controller.x().onTrue(new AlignCommand(drive, m_vision, testTagId));
+    } // end visionTest
   }
 
   /**
