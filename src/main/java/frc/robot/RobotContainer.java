@@ -14,16 +14,16 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import com.revrobotics.ColorMatch;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AlignCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.drive.Drive;
@@ -49,9 +49,16 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooserCommands;
 
   /* Limelight */
-  private final VisionSubsystem m_vision;
+  private final VisionSubsystem m_vision = new VisionSubsystem();
+  // private final VisionSubsystem_Test m_vision = new VisionSubsystem_Test();
+
+  /* some esoteric stuff */
+  private final ColorMatch m_colorMatcher = new ColorMatch();
+  private final Color kBlue = new Color(0.143, 0.427, 0.429);
+  private final Color kRed = new Color(0.561, 0.232, 0.114);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -95,8 +102,6 @@ public class RobotContainer {
 
     /* Limelight */
     /* initial attempt */
-    // public final VisionSubsystem_Test limelight = new VisionSubsystem_Test();
-    m_vision = new VisionSubsystem();
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -114,6 +119,15 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    autoChooserCommands = new LoggedDashboardChooser<>("Command Options");
+    autoChooserCommands.addOption(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    SmartDashboard.putString("Alliance", DriverStation.getAlliance().toString());
+    SmartDashboard.putString("AllianceNumber", DriverStation.getRawAllianceStation().toString());
+
+    m_colorMatcher.addColorMatch(kBlue);
+    m_colorMatcher.addColorMatch(kRed);
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -125,6 +139,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    /*
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -160,29 +175,34 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> drive.stop()));
 
     controller.povUp().whileTrue(DriveCommands.joystickDrive(drive, () -> 0.1, () -> 0., () -> 0.));
-
+    */
     /* Vision Subsystem */
-    boolean visionTest = false;
+    boolean visionTest = true;
     if (visionTest) {
       // get vision-based distance
-      // joystick.x().onTrue(new InstantCommand(() -> limelight.getDistanceToTarget()));
+
       /* onTrue: robot moves until the alignment is completed
        *  whileTrue: must press the button until the alignment is completed
        */
-      // joystick.x().onTrue(new AlignCommand(drivetrain, m_vision, VisionConstants.testTagId));
+
       /* simulate a sequence:
        * align with AprilTag
        * Move forward by 2 meters
        */
       /* Testing Closest versus a specific AprilTag */
-      boolean closestTag = true;
+      boolean closestTag = false;
       // Default: a specific tag number
-      int testTagId = VisionConstants.testTagId;
+      final int testTagId = 2; // VisionConstants.testTagId;
       if (closestTag) {
-        testTagId = 0;
+        // testTagId = 0;
       }
-
+      // System.out.println("testtag" + testTagId);
+      SmartDashboard.putNumber("testtagId ", 2);
+      controller.x().whileTrue(new AlignCommand(m_vision, testTagId));
+      // controller.povCenter().whileTrue(new InstantCommand(() -> m_vision.getFiducialWithId(12)));
+      controller.povCenter().whileTrue(new AlignCommand(m_vision, 12));
       // controller.x().onTrue(new AlignCommand(drive, m_vision, testTagId));
+      controller.y().whileTrue(new AlignCommand(m_vision, 0));
     } // end visionTest
   }
 

@@ -34,13 +34,15 @@ public class AlignCommand extends Command {
   }
 
   @Override
-  public void initialize() {}
+  public void initialize() {
+    System.out.println(getName() + " AlignCommand");
+  }
 
   @Override
   public void execute() {
 
     RawFiducial fiducial;
-
+    SmartDashboard.putNumber("TagID", m_tagId);
     try {
       if (m_tagId == 0) {
         fiducial = m_limelight.getClosestFiducial();
@@ -52,7 +54,8 @@ public class AlignCommand extends Command {
       SmartDashboard.putNumber("distToRobot", fiducial.distToRobot);
       SmartDashboard.putNumber("rotationalPidController", rotationalRate);
       SmartDashboard.putNumber("xPidController", velocityX);
-      SmartDashboard.putNumber("TagID", m_tagId);
+
+      System.out.println(getName() + " AlignCommand" + String.valueOf(fiducial.distToRobot));
 
     } catch (VisionSubsystem.NoSuchTargetException nste) {
       System.out.println("No apriltag found");

@@ -3,14 +3,11 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Vision.LimelightHelpers;
 import frc.robot.Vision.LimelightHelpers.*;
-import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
   private RawFiducial[] fiducials;
@@ -31,7 +28,7 @@ public class VisionSubsystem extends SubsystemBase {
     LimelightHelpers.setCameraPose_RobotSpace(
         "",
         Meters.convertFrom(30. / 2., Inches), // forward location wrt robot center
-        0., // assume perfect alignment with robor center
+        Meters.convertFrom(-1.75, Inches), // assume perfect alignment with robor center
         Meters.convertFrom(
             VisionConstants.limelightLensHeightInches, Inches), // height of camera from the floor
         0,
@@ -39,6 +36,7 @@ public class VisionSubsystem extends SubsystemBase {
         0);
     // Overrides the valid AprilTag IDs that will be used for localization.
     // Tags not in this list will be ignored for robot pose estimation.
+    /*
     Optional<Alliance> ally = DriverStation.getAlliance();
     int[] tagsToConsider = new int[] {};
     if (ally.isPresent()) {
@@ -51,13 +49,20 @@ public class VisionSubsystem extends SubsystemBase {
     } else {
       System.out.println("No Alliance info is available");
     }
+    */
 
-    LimelightHelpers.SetFiducialIDFiltersOverride("", tagsToConsider);
+    LimelightHelpers.SetFiducialIDFiltersOverride(
+        "", new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
   }
 
   @Override
   public void periodic() {
     fiducials = LimelightHelpers.getRawFiducials("");
+
+    SmartDashboard.putBoolean("Limelight Has Target", getTV());
+    SmartDashboard.putNumber("Limelight X Offset", getTX());
+    SmartDashboard.putNumber("Limelight Y Offset", getTY());
+    SmartDashboard.putNumber("Limelight Area", getTA());
   }
 
   public RawFiducial getClosestFiducial() {
@@ -68,6 +73,7 @@ public class VisionSubsystem extends SubsystemBase {
     RawFiducial closest = fiducials[0];
     double minDistance = closest.ta;
     SmartDashboard.putNumber("minDistance", minDistance);
+    SmartDashboard.putNumber("closetstId", closest.id);
 
     for (RawFiducial fiducial : fiducials) {
       if (fiducial.ta > minDistance) {
@@ -80,7 +86,7 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public RawFiducial getFiducialWithId(int id) {
-
+    SmartDashboard.putNumber("getFiducialWithId", id);
     for (RawFiducial fiducial : fiducials) {
       if (fiducial.id == id) {
         return fiducial;
